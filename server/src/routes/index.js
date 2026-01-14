@@ -6,7 +6,7 @@ const router = express.Router();
 router.get('/', (req, res) => {
   res.json({
     status: 'success',
-    message: 'LeetCode Backend API',
+    message: 'Code Play Backend API',
     version: 'v1',
     endpoints: {
       health: '/health',
