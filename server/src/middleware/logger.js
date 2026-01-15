@@ -68,14 +68,13 @@ const levelFilter = (level) => {
 
 const logsDir = path.resolve(__dirname, '../../logs');
 const apiLogsDir = path.resolve(__dirname, '../../logs/api');
-const pistonLogsDir = path.resolve(__dirname, '../../logs/piston');
 const errorLogsDir = path.resolve(__dirname, '../../logs/error');
 const warnLogsDir = path.resolve(__dirname, '../../logs/warn');
 const infoLogsDir = path.resolve(__dirname, '../../logs/info');
 const debugLogsDir = path.resolve(__dirname, '../../logs/debug');
 
 // Ensure all logs directories exist
-[logsDir, apiLogsDir, pistonLogsDir, errorLogsDir, warnLogsDir, infoLogsDir, debugLogsDir].forEach(dir => {
+[logsDir, apiLogsDir, errorLogsDir, warnLogsDir, infoLogsDir, debugLogsDir].forEach(dir => {
   if (!fs.existsSync(dir)) {
     fs.mkdirSync(dir, { recursive: true });
   }
@@ -108,31 +107,6 @@ const apiLogger = createLogger({
       handleExceptions: false,
       handleRejections: false,
       auditFile: path.join(apiLogsDir, 'api-audit.json'),
-    })
-  ],
-  exitOnError: false,
-});
-
-// Create Piston API logger (for Piston API calls)
-const pistonLogger = createLogger({
-  level: 'info',
-  format: combine(timestamp({ format: 'YYYY-MM-DD HH:mm:ss' })),
-  defaultMeta: { 
-    service: 'piston-api',
-    environment: process.env.NODE_ENV || 'development'
-  },
-  transports: [
-    // Daily rotating file for Piston API logs
-    new DailyRotateFile({
-      filename: path.join(pistonLogsDir, 'piston-%DATE%.log'),
-      datePattern: 'YYYY-MM-DD',
-      zippedArchive: false,
-      maxSize: '20m',
-      maxFiles: '30d',
-      format: combine(timestamp({ format: 'YYYY-MM-DD HH:mm:ss' }), standardLogFormat),
-      handleExceptions: false,
-      handleRejections: false,
-      auditFile: path.join(pistonLogsDir, 'piston-audit.json'),
     })
   ],
   exitOnError: false,
@@ -232,10 +206,6 @@ apiLogger.on('error', (err) => {
   console.error('API Logger error:', err);
 });
 
-pistonLogger.on('error', (err) => {
-  console.error('Piston Logger error:', err);
-});
-
 logger.on('error', (err) => {
   console.error('General Logger error:', err);
 });
@@ -302,6 +272,6 @@ export const requestLogger = (req, res, next) => {
 };
 
 // Export loggers
-export { apiLogger, pistonLogger };
+export { apiLogger };
 
 export default logger;

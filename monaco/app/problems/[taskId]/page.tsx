@@ -50,7 +50,7 @@ export default function ProblemPage() {
   };
 
   const handleRunCode = async () => {
-    if (!problem) return;
+    if (!problem || !code.trim()) return;
 
     setIsRunning(true);
     setTestResults(null);
@@ -82,8 +82,7 @@ export default function ProblemPage() {
       }
 
       const result = await runCode(
-        currentLang.pistonRuntime,
-        currentLang.version,
+        language,
         code,
         firstTestCase.input
       );
@@ -118,7 +117,7 @@ export default function ProblemPage() {
   };
 
   const handleSubmit = async () => {
-    if (!problem) return;
+    if (!problem || !code.trim()) return;
 
     setIsSubmitting(true);
     setTestResults(null);
@@ -142,8 +141,7 @@ export default function ProblemPage() {
       const testCases = problem.input_output;
 
       const result = await submitCode(
-        currentLang.pistonRuntime,
-        currentLang.version,
+        language,
         code,
         testCases
       );
@@ -182,6 +180,9 @@ export default function ProblemPage() {
     value: lang.id,
     label: lang.name,
   }));
+
+  // Check if code is empty
+  const isCodeEmpty = !code.trim();
 
   if (loading) {
     return (
@@ -251,7 +252,7 @@ export default function ProblemPage() {
               <AnimatedButton
                 variant="secondary"
                 onClick={handleRunCode}
-                disabled={isRunning || isSubmitting}
+                disabled={isRunning || isSubmitting || isCodeEmpty}
               >
                 {isRunning ? (
                   <>
@@ -273,7 +274,7 @@ export default function ProblemPage() {
               <AnimatedButton
                 variant="success"
                 onClick={handleSubmit}
-                disabled={isRunning || isSubmitting}
+                disabled={isRunning || isSubmitting || isCodeEmpty}
               >
                 {isSubmitting ? (
                   <>

@@ -46,7 +46,9 @@ export interface TestResult {
 }
 
 export interface SubmissionResult {
-  results: TestResult[];
+  allResults: TestResult[];
+  passedResults: TestResult[];
+  failedResults: TestResult[];
   totalTests: number;
   passedTests: number;
   failedTests: number;
@@ -96,7 +98,6 @@ export async function fetchProblemByTaskId(taskId: string): Promise<Problem> {
 
 export async function runCode(
   language: string,
-  version: string,
   code: string,
   stdin?: string
 ): Promise<ExecutionResult> {
@@ -107,7 +108,6 @@ export async function runCode(
     },
     body: JSON.stringify({
       language,
-      version,
       code,
       stdin: stdin || '',
       args: []
@@ -125,7 +125,6 @@ export async function runCode(
 
 export async function submitCode(
   language: string,
-  version: string,
   code: string,
   testCases: Array<{ input: string; output: string }>
 ): Promise<SubmissionResult> {
@@ -136,7 +135,6 @@ export async function submitCode(
     },
     body: JSON.stringify({
       language,
-      version,
       code,
       testCases
     }),

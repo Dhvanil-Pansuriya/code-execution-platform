@@ -24,11 +24,17 @@ export default function AnimatedButton({
 
   return (
     <button
-      className={`relative inline-flex h-12 active:scale-95 transition overflow-hidden rounded-lg p-[1px] focus:outline-none ${
-        disabled ? "opacity-50 cursor-not-allowed" : ""
+      className={`relative inline-flex h-12 transition overflow-hidden rounded-lg p-[1px] focus:outline-none ${
+        disabled 
+          ? "opacity-50" 
+          : "active:scale-95 hover:opacity-90"
       } ${className}`}
+      style={{
+        cursor: disabled ? 'not-allowed' : 'pointer',
+        pointerEvents: disabled ? 'none' : 'auto'
+      }}
       disabled={disabled}
-      onMouseEnter={() => setIsHovered(true)}
+      onMouseEnter={() => !disabled && setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
       {...props}
     >
@@ -37,7 +43,12 @@ export default function AnimatedButton({
           className={`absolute inset-[-1000%] animate-[spin_2s_linear_infinite] ${gradientColors[variant]}`}
         />
       )}
-      <span className="inline-flex h-full w-full cursor-pointer items-center justify-center rounded-lg bg-slate-950 px-7 text-sm font-medium text-white backdrop-blur-3xl gap-2">
+      <span 
+        className="inline-flex h-full w-full items-center justify-center rounded-lg bg-slate-950 px-7 text-sm font-medium text-white backdrop-blur-3xl gap-2"
+        style={{
+          cursor: disabled ? 'not-allowed' : 'pointer'
+        }}
+      >
         {children}
       </span>
     </button>
