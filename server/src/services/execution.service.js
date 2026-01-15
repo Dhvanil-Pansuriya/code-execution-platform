@@ -52,7 +52,8 @@ export const executeCode = async (language, version, code, stdin = '', args = []
         success: false,
         output: '',
         error: data.compile.stderr,
-        executionTime
+        executionTime,
+        isCompileError: true
       };
     }
 
@@ -61,7 +62,8 @@ export const executeCode = async (language, version, code, stdin = '', args = []
         success: false,
         output: data.run.stdout || '',
         error: data.run.stderr,
-        executionTime
+        executionTime,
+        isRuntimeError: true
       };
     }
 
@@ -129,13 +131,37 @@ export const executeWithTests = async (language, version, code, testCases) => {
       } else {
         failedResults.push(testResult);
       }
+
+      // If first test case has compilation or syntax error, stop execution
+      if (i === 0 && (result.isCompileError || result.error)) {
+        console.log(`Compilation/Syntax error detected in first test case. Stopping execution.`);
+        console.log(`Error: ${result.error}`);
+        
+        const totalTests = allResults.length;
+        const passedTests = passedResults.length;
+        const failedTests = failedResults.length;
+
+        console.log(`Test Results: Total: ${totalTests} | Passed: ${passedTests} | Failed: ${failedTests} | Stopped due to error`);
+
+        return {
+          success: false,
+          totalTests,
+          passedTests,
+          failedTests,
+          allResults,
+          passedResults,
+          failedResults,
+          stoppedEarly: true,
+          errorMessage: result.error
+        };
+      }
     }
 
     const totalTests = allResults.length;
     const passedTests = passedResults.length;
     const failedTests = failedResults.length;
 
-    logger.info(`Test Results: Total: ${totalTests} | Passed: ${passedTests} | Failed: ${failedTests} | Success Rate: ${((passedTests / totalTests) * 100).toFixed(2)}%`);
+    console.log(`Test Results: Total: ${totalTests} | Passed: ${passedTests} | Failed: ${failedTests} | Success Rate: ${((passedTests / totalTests) * 100).toFixed(2)}%`);
 
     return {
       success: passedTests === totalTests,
