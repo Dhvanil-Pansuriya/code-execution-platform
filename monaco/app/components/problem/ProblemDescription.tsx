@@ -34,13 +34,7 @@ export default function ProblemDescription({ problem }: ProblemDescriptionProps)
         <h2 className="text-white font-semibold text-lg">Description</h2>
       </div>
 
-      <div 
-        className="flex-1 overflow-y-auto p-6"
-        style={{
-          scrollbarWidth: "thin",
-          scrollbarColor: "#52525b #27272a",
-        }}
-      >
+      <div className="flex-1 overflow-y-auto p-6">
         <motion.div
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}

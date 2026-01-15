@@ -135,6 +135,8 @@ export const executeWithTests = async (language, version, code, testCases) => {
     const passedTests = passedResults.length;
     const failedTests = failedResults.length;
 
+    logger.info(`Test Results: Total: ${totalTests} | Passed: ${passedTests} | Failed: ${failedTests} | Success Rate: ${((passedTests / totalTests) * 100).toFixed(2)}%`);
+
     return {
       success: passedTests === totalTests,
       totalTests,

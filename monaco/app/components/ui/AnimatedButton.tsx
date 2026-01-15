@@ -24,7 +24,7 @@ export default function AnimatedButton({
 
   return (
     <button
-      className={`relative inline-flex h-12 transition overflow-hidden rounded-lg p-[1px] focus:outline-none ${
+      className={`relative inline-flex h-12 transition overflow-hidden rounded-lg p-[1.5px] focus:outline-none ${
         disabled 
           ? "opacity-50" 
           : "active:scale-95 hover:opacity-90"

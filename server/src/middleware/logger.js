@@ -3,6 +3,7 @@ import DailyRotateFile from 'winston-daily-rotate-file';
 import path from 'path';
 import fs from 'fs';
 import { fileURLToPath } from 'url';
+import { v4 as uuidv4 } from 'uuid';
 
 const { createLogger, format, transports } = winston;
 const { combine, timestamp, printf, colorize } = format;
@@ -14,7 +15,7 @@ const __dirname = path.dirname(__filename);
 const apiLogFormat = printf(({ level, message, timestamp, requestId, service, environment, method, url, statusCode, responseTime, ip, userId, headers, body }) => {
   if (requestId) {
     // Structured format for API file logging with headers - use METHOD as level
-    return `${timestamp} [${method}]: ${url} ${statusCode} ${responseTime} - userId=${userId || 'anonymous'} requestId=${requestId} service=${service} environment=${environment} ip=${ip} headers=${JSON.stringify(headers || {})} body=${JSON.stringify(body || {})}`;
+    return `${timestamp} [${method}] [${requestId}]: ${url} ${statusCode} ${responseTime} - userId=${userId || 'anonymous'} service=${service} environment=${environment} ip=${ip} headers=${JSON.stringify(headers || {})} body=${JSON.stringify(body || {})}`;
   } else {
     // Simple format for other logs
     return `${timestamp} [${level}]: ${message}`;
@@ -35,9 +36,9 @@ const consoleFormat = printf(({ level, message, timestamp }) => {
   return `${timestamp} [${level}]: ${message}`;
 });
 
-// Custom format for error logs
-const errorLogFormat = printf(({ level, message, timestamp, stack, ...meta }) => {
-  let log = `${timestamp} [${level}]: ${message}`;
+// Custom format for error logs with UUID
+const errorLogFormat = printf(({ level, message, timestamp, stack, uuid, ...meta }) => {
+  let log = `${timestamp} [${level}] [${uuid}]: ${message}`;
   if (stack) {
     log += `\nStack: ${stack}`;
   }
@@ -47,9 +48,9 @@ const errorLogFormat = printf(({ level, message, timestamp, stack, ...meta }) =>
   return log;
 });
 
-// Custom format for info and debug logs
-const standardLogFormat = printf(({ level, message, timestamp, ...meta }) => {
-  let log = `${timestamp} [${level}]: ${message}`;
+// Custom format for info and debug logs with UUID
+const standardLogFormat = printf(({ level, message, timestamp, uuid, ...meta }) => {
+  let log = `${timestamp} [${level}] [${uuid}]: ${message}`;
   if (Object.keys(meta).length > 0 && !meta.service && !meta.environment) {
     log += ` ${JSON.stringify(meta)}`;
   }
@@ -65,6 +66,12 @@ const levelFilter = (level) => {
     return false;
   })();
 };
+
+// Add UUID to log entries
+const addUuid = format((info) => {
+  info.uuid = info.uuid || uuidv4();
+  return info;
+});
 
 const logsDir = path.resolve(__dirname, '../../logs');
 const apiLogsDir = path.resolve(__dirname, '../../logs/api');
@@ -117,6 +124,7 @@ const logger = createLogger({
   level: process.env.NODE_ENV === 'development' ? 'debug' : 'info',
   format: combine(
     timestamp({ format: 'YYYY-MM-DD HH:mm:ss' }),
+    addUuid(),
     format.errors({ stack: true })
   ),
   transports: [
@@ -139,6 +147,7 @@ const logger = createLogger({
       maxFiles: '30d',
       format: combine(
         timestamp({ format: 'YYYY-MM-DD HH:mm:ss' }),
+        addUuid(),
         levelFilter('error'),
         errorLogFormat
       ),
@@ -156,6 +165,7 @@ const logger = createLogger({
       maxFiles: '30d',
       format: combine(
         timestamp({ format: 'YYYY-MM-DD HH:mm:ss' }),
+        addUuid(),
         levelFilter('warn'),
         standardLogFormat
       ),
@@ -173,6 +183,7 @@ const logger = createLogger({
       maxFiles: '30d',
       format: combine(
         timestamp({ format: 'YYYY-MM-DD HH:mm:ss' }),
+        addUuid(),
         levelFilter('info'),
         standardLogFormat
       ),
@@ -190,6 +201,7 @@ const logger = createLogger({
       maxFiles: '30d',
       format: combine(
         timestamp({ format: 'YYYY-MM-DD HH:mm:ss' }),
+        addUuid(),
         levelFilter('debug'),
         standardLogFormat
       ),
@@ -233,6 +245,7 @@ const getLogFilePath = () => {
 // Custom request logging middleware
 export const requestLogger = (req, res, next) => {
   const start = Date.now();
+  const requestId = uuidv4(); // Generate UUID for each request
   
   // Capture original end function
   const originalEnd = res.end;
@@ -247,9 +260,9 @@ export const requestLogger = (req, res, next) => {
     const consoleMessage = `${req.method} ${req.originalUrl} ${res.statusCode} ${responseTime}ms - IP: ${ip}`;
     console.log(`\x1b[36m${timestamp}\x1b[0m \x1b[32m[info]\x1b[0m: ${consoleMessage}`);
     
-    // Formatted file log (readable format)
+    // Formatted file log (readable format) with UUID
     const logLines = [
-      `${timestamp} [info]: ${req.method} ${req.originalUrl} ${res.statusCode} ${responseTime}ms - IP: ${ip}`,
+      `${timestamp} [info] [${requestId}]: ${req.method} ${req.originalUrl} ${res.statusCode} ${responseTime}ms - IP: ${ip}`,
       `  Headers: ${JSON.stringify(req.headers || {})}`,
       `  Body: ${JSON.stringify(req.body || {})}`,
       `  Query: ${JSON.stringify(req.query || {})}`,
