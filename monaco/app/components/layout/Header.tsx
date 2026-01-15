@@ -1,7 +1,8 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { FaPlay } from "react-icons/fa";
+import { useRouter } from "next/navigation";
+import { FaPlay, FaListUl } from "react-icons/fa";
 import { MdClear } from "react-icons/md";
 import { Language } from "../../types/language";
 import AnimatedButton from "../ui/AnimatedButton";
@@ -26,6 +27,7 @@ export default function Header({
   isRunning,
   showOutput,
 }: HeaderProps) {
+  const router = useRouter();
   const languageOptions = languages.map((lang) => ({
     value: lang.id,
     label: lang.name,
@@ -48,7 +50,7 @@ export default function Header({
             className="flex-shrink-0"
           >
             <h1 className="text-xl font-bold text-white">
-              Monaco Code Runner
+              Code Play Editor
             </h1>
             <p className="text-zinc-400 text-xs mt-1">
               Multi-language code editor powered by Piston API
@@ -62,6 +64,15 @@ export default function Header({
             transition={{ duration: 0.5, delay: 0.2 }}
             className="flex items-center gap-3"
           >
+            {/* Problems Button */}
+            <AnimatedButton
+              variant="secondary"
+              onClick={() => router.push("/problems")}
+            >
+              <FaListUl className="w-4 h-4" />
+              Problems
+            </AnimatedButton>
+
             {/* Language Dropdown */}
             <Dropdown
               options={languageOptions}

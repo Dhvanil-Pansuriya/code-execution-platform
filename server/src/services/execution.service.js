@@ -104,29 +104,45 @@ export const getRuntimes = async () => {
  */
 export const executeWithTests = async (language, version, code, testCases) => {
   try {
-    const results = [];
+    const allResults = [];
+    const passedResults = [];
+    const failedResults = [];
 
-    for (const testCase of testCases) {
+    for (let i = 0; i < testCases.length; i++) {
+      const testCase = testCases[i];
       const result = await executeCode(language, version, code, testCase.input);
-      results.push({
+      
+      const testResult = {
+        testNumber: i + 1,
         input: testCase.input,
         expectedOutput: testCase.output,
         actualOutput: result.output,
         passed: result.output.trim() === testCase.output.trim(),
         executionTime: result.executionTime,
         error: result.error
-      });
+      };
+
+      allResults.push(testResult);
+
+      if (testResult.passed) {
+        passedResults.push(testResult);
+      } else {
+        failedResults.push(testResult);
+      }
     }
 
-    const totalTests = results.length;
-    const passedTests = results.filter(r => r.passed).length;
+    const totalTests = allResults.length;
+    const passedTests = passedResults.length;
+    const failedTests = failedResults.length;
 
     return {
       success: passedTests === totalTests,
       totalTests,
       passedTests,
-      failedTests: totalTests - passedTests,
-      results
+      failedTests,
+      allResults,
+      passedResults,
+      failedResults
     };
   } catch (error) {
     logger.error(`Error in executeWithTests: ${error.message}`);

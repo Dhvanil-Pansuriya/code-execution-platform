@@ -90,16 +90,13 @@ export default function Dropdown({
             transition={{ duration: 0.2 }}
             className="absolute z-50 w-full mt-2 bg-zinc-800 border border-zinc-700 rounded-lg shadow-2xl overflow-hidden"
           >
-            <div className="max-h-[300px] overflow-y-auto scrollbar-hide">
-              <style jsx>{`
-                .scrollbar-hide::-webkit-scrollbar {
-                  display: none;
-                }
-                .scrollbar-hide {
-                  -ms-overflow-style: none;
-                  scrollbar-width: none;
-                }
-              `}</style>
+            <div
+              className="max-h-[300px] overflow-y-auto"
+              style={{
+                scrollbarWidth: "thin",
+                scrollbarColor: "#52525b #27272a",
+              }}
+            >
               {options.map((option, index) => (
                 <motion.button
                   key={option.value}

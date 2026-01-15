@@ -68,13 +68,14 @@ const levelFilter = (level) => {
 
 const logsDir = path.resolve(__dirname, '../../logs');
 const apiLogsDir = path.resolve(__dirname, '../../logs/api');
+const pistonLogsDir = path.resolve(__dirname, '../../logs/piston');
 const errorLogsDir = path.resolve(__dirname, '../../logs/error');
 const warnLogsDir = path.resolve(__dirname, '../../logs/warn');
 const infoLogsDir = path.resolve(__dirname, '../../logs/info');
 const debugLogsDir = path.resolve(__dirname, '../../logs/debug');
 
 // Ensure all logs directories exist
-[logsDir, apiLogsDir, errorLogsDir, warnLogsDir, infoLogsDir, debugLogsDir].forEach(dir => {
+[logsDir, apiLogsDir, pistonLogsDir, errorLogsDir, warnLogsDir, infoLogsDir, debugLogsDir].forEach(dir => {
   if (!fs.existsSync(dir)) {
     fs.mkdirSync(dir, { recursive: true });
   }
@@ -107,6 +108,31 @@ const apiLogger = createLogger({
       handleExceptions: false,
       handleRejections: false,
       auditFile: path.join(apiLogsDir, 'api-audit.json'),
+    })
+  ],
+  exitOnError: false,
+});
+
+// Create Piston API logger (for Piston API calls)
+const pistonLogger = createLogger({
+  level: 'info',
+  format: combine(timestamp({ format: 'YYYY-MM-DD HH:mm:ss' })),
+  defaultMeta: { 
+    service: 'piston-api',
+    environment: process.env.NODE_ENV || 'development'
+  },
+  transports: [
+    // Daily rotating file for Piston API logs
+    new DailyRotateFile({
+      filename: path.join(pistonLogsDir, 'piston-%DATE%.log'),
+      datePattern: 'YYYY-MM-DD',
+      zippedArchive: false,
+      maxSize: '20m',
+      maxFiles: '30d',
+      format: combine(timestamp({ format: 'YYYY-MM-DD HH:mm:ss' }), standardLogFormat),
+      handleExceptions: false,
+      handleRejections: false,
+      auditFile: path.join(pistonLogsDir, 'piston-audit.json'),
     })
   ],
   exitOnError: false,
@@ -206,6 +232,10 @@ apiLogger.on('error', (err) => {
   console.error('API Logger error:', err);
 });
 
+pistonLogger.on('error', (err) => {
+  console.error('Piston Logger error:', err);
+});
+
 logger.on('error', (err) => {
   console.error('General Logger error:', err);
 });
@@ -224,7 +254,54 @@ logger.stream = {
   },
 };
 
-// Export both loggers
-export { apiLogger };
+// Get today's log file path
+const getLogFilePath = () => {
+  const today = new Date().toISOString().split('T')[0];
+  return path.join(apiLogsDir, `api-${today}.log`);
+};
+
+// Custom request logging middleware
+export const requestLogger = (req, res, next) => {
+  const start = Date.now();
+  
+  // Capture original end function
+  const originalEnd = res.end;
+  
+  // Override end function to log after response
+  res.end = function(...args) {
+    const responseTime = Date.now() - start;
+    const timestamp = new Date().toISOString().replace('T', ' ').substring(0, 19);
+    const ip = req.ip || req.connection.remoteAddress || 'unknown';
+    
+    // Simple console log (without headers and body)
+    const consoleMessage = `${req.method} ${req.originalUrl} ${res.statusCode} ${responseTime}ms - IP: ${ip}`;
+    console.log(`\x1b[36m${timestamp}\x1b[0m \x1b[32m[info]\x1b[0m: ${consoleMessage}`);
+    
+    // Formatted file log (readable format)
+    const logLines = [
+      `${timestamp} [info]: ${req.method} ${req.originalUrl} ${res.statusCode} ${responseTime}ms - IP: ${ip}`,
+      `  Headers: ${JSON.stringify(req.headers || {})}`,
+      `  Body: ${JSON.stringify(req.body || {})}`,
+      `  Query: ${JSON.stringify(req.query || {})}`,
+      `  Params: ${JSON.stringify(req.params || {})}`,
+      '' // Empty line for separation
+    ].join('\n');
+    
+    // Write to log file
+    fs.appendFile(getLogFilePath(), logLines + '\n', (err) => {
+      if (err) {
+        console.error('Error writing to log file:', err);
+      }
+    });
+    
+    // Call original end function
+    originalEnd.apply(res, args);
+  };
+  
+  next();
+};
+
+// Export loggers
+export { apiLogger, pistonLogger };
 
 export default logger;

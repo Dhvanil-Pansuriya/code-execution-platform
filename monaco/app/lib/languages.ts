@@ -257,4 +257,212 @@ object Main {
   }
 }`,
   },
+  {
+    id: "bash",
+    name: "Bash",
+    pistonRuntime: "bash",
+    version: "5.2.0",
+    defaultCode: `#!/bin/bash
+# Bash Example
+
+greet() {
+    echo "Hello, $1!"
+}
+
+message=$(greet "Developer")
+echo "$message"
+echo "Bash is running on Piston API!"`,
+  },
+  {
+    id: "lua",
+    name: "Lua",
+    pistonRuntime: "lua",
+    version: "5.4.4",
+    defaultCode: `-- Lua Example
+function greet(name)
+    return "Hello, " .. name .. "!"
+end
+
+local message = greet("Developer")
+print(message)
+print("Lua is running on Piston API!")`,
+  },
+  {
+    id: "haskell",
+    name: "Haskell",
+    pistonRuntime: "haskell",
+    version: "9.0.1",
+    defaultCode: `-- Haskell Example
+greet :: String -> String
+greet name = "Hello, " ++ name ++ "!"
+
+main :: IO ()
+main = do
+    let message = greet "Developer"
+    putStrLn message
+    putStrLn "Haskell is running on Piston API!"`,
+  },
+  {
+    id: "elixir",
+    name: "Elixir",
+    pistonRuntime: "elixir",
+    version: "1.13.4",
+    defaultCode: `# Elixir Example
+defmodule Hello do
+  def greet(name) do
+    "Hello, #{name}!"
+  end
+end
+
+message = Hello.greet("Developer")
+IO.puts(message)
+IO.puts("Elixir is running on Piston API!")`,
+  },
+  {
+    id: "clojure",
+    name: "Clojure",
+    pistonRuntime: "clojure",
+    version: "1.10.3",
+    defaultCode: `; Clojure Example
+(defn greet [name]
+  (str "Hello, " name "!"))
+
+(def message (greet "Developer"))
+(println message)
+(println "Clojure is running on Piston API!")`,
+  },
+  {
+    id: "dart",
+    name: "Dart",
+    pistonRuntime: "dart",
+    version: "2.19.6",
+    defaultCode: `// Dart Example
+String greet(String name) {
+  return 'Hello, $name!';
+}
+
+void main() {
+  var message = greet('Developer');
+  print(message);
+  print('Dart is running on Piston API!');
+}`,
+  },
+  {
+    id: "fsharp",
+    name: "F#",
+    pistonRuntime: "fsharp",
+    version: "7.0.203",
+    defaultCode: `// F# Example
+let greet name =
+    sprintf "Hello, %s!" name
+
+let message = greet "Developer"
+printfn "%s" message
+printfn "F# is running on Piston API!"`,
+  },
+  {
+    id: "groovy",
+    name: "Groovy",
+    pistonRuntime: "groovy",
+    version: "4.0.0",
+    defaultCode: `// Groovy Example
+def greet(name) {
+    return "Hello, $name!"
+}
+
+def message = greet("Developer")
+println message
+println "Groovy is running on Piston API!"`,
+  },
+  {
+    id: "julia",
+    name: "Julia",
+    pistonRuntime: "julia",
+    version: "1.8.5",
+    defaultCode: `# Julia Example
+function greet(name)
+    return "Hello, $name!"
+end
+
+message = greet("Developer")
+println(message)
+println("Julia is running on Piston API!")`,
+  },
+  {
+    id: "ocaml",
+    name: "OCaml",
+    pistonRuntime: "ocaml",
+    version: "4.12.0",
+    defaultCode: `(* OCaml Example *)
+let greet name =
+  "Hello, " ^ name ^ "!"
+
+let () =
+  let message = greet "Developer" in
+  print_endline message;
+  print_endline "OCaml is running on Piston API!"`,
+  },
+  {
+    id: "pascal",
+    name: "Pascal",
+    pistonRuntime: "pascal",
+    version: "3.2.2",
+    defaultCode: `// Pascal Example
+program Hello;
+
+function Greet(name: string): string;
+begin
+  Greet := 'Hello, ' + name + '!';
+end;
+
+var
+  message: string;
+
+begin
+  message := Greet('Developer');
+  WriteLn(message);
+  WriteLn('Pascal is running on Piston API!');
+end.`,
+  },
+  {
+    id: "prolog",
+    name: "Prolog",
+    pistonRuntime: "prolog",
+    version: "8.4.2",
+    defaultCode: `% Prolog Example
+greet(Name, Message) :-
+    atom_concat('Hello, ', Name, Temp),
+    atom_concat(Temp, '!', Message).
+
+:- initialization(main).
+main :-
+    greet('Developer', Message),
+    writeln(Message),
+    writeln('Prolog is running on Piston API!'),
+    halt.`,
+  },
+  {
+    id: "racket",
+    name: "Racket",
+    pistonRuntime: "racket",
+    version: "8.3.0",
+    defaultCode: `#lang racket
+; Racket Example
+
+(define (greet name)
+  (string-append "Hello, " name "!"))
+
+(define message (greet "Developer"))
+(displayln message)
+(displayln "Racket is running on Piston API!")`,
+  },
+  {
+    id: "sql",
+    name: "SQL (SQLite)",
+    pistonRuntime: "sqlite3",
+    version: "3.36.0",
+    defaultCode: `-- SQL Example
+SELECT 'Hello, Developer!' as message;
+SELECT 'SQL is running on Piston API!' as info;`,
+  },
 ];
